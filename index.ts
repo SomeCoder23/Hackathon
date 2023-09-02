@@ -41,6 +41,14 @@ app.post('/upload', upload.single('file'), (req, res) => {
   });
 });
 
+app.get('/health', (req, res) => {
+  res.status(200).send("Everything good");
+})
+
+app.get('/', (req, res) => {
+  res.status(200).send("Welcome to our application.");
+})
+
 app.post('/labels', upload.single('file'), async (req, res) => {
   try {
     // Check if a file was uploaded in the request
