@@ -1,6 +1,9 @@
 import express from 'express';
 import multer from 'multer';
 import fs from 'fs';
+import celebsRouter from './routers/celebs.js';
+import textRouter from './routers/text.js';
+import dataSource from "./db/dataSource.js";
 const AWS = require("aws-sdk");
 AWS.config.update({ region: 'us-west-2' });
 const rekognition = new AWS.Rekognition();
@@ -9,6 +12,8 @@ console.log('Region: ' + AWS.config.region);
 var app = express();
 
 const PORT = 5000;
+app.use('/celebs', celebsRouter);
+app.use('/text', textRouter);
 
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
@@ -24,8 +29,6 @@ const upload = multer({ storage });
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-
-
 app.post('/upload', upload.single('file'), (req, res) => {
   if (!req.file) {
     res.status(500).send("Failed Upload File!");
@@ -37,23 +40,6 @@ app.post('/upload', upload.single('file'), (req, res) => {
     file: fileURL
   });
 });
-
-/*app.get('/label', (req, res) => {
-
-  const params = {  Image: {
-    Bytes: '',  },
-};
-rekognition.detectLabels(params, (err: any, data: { Labels: any; }) => {  
-  if (err) {
-    console.error('Error detecting labels:', err);  
-    res.send("Something went wrong");
-  } else {
-    console.log('Labels detected:', data.Labels);  
-    res.send(data.Labels);
-  }
-});
-
-});*/
 
 app.post('/labels', upload.single('file'), async (req, res) => {
   try {
@@ -84,7 +70,7 @@ app.post('/labels', upload.single('file'), async (req, res) => {
   }
 });
 
-app.post('/celebs', upload.single('file'), async (req, res) => {
+/*app.post('/celebs', upload.single('file'), async (req, res) => {
   try {
     // Check if a file was uploaded in the request
     if (!req.file) {
@@ -117,10 +103,6 @@ app.post('/celebs', upload.single('file'), async (req, res) => {
       console.log("ERROR: " + err);
       res.send(err);
   }
-
-
-
-  
 });
 
 app.post('/text', upload.single('file'), async (req, res) => {
@@ -154,52 +136,13 @@ app.post('/text', upload.single('file'), async (req, res) => {
   } catch(err){
       console.log("ERROR: " + err);
       res.send(err);
-  }
-
-
-
-  
-});
-
-
+  }  
+});*/
 
 app.listen(PORT, () => {
   console.log(`App is listening on port ${PORT}`);
+  dataSource.initialize();
+
 });
 
 export default app;
-
-//const imageFilePath = 'uploads/1693647378038-alienYellow_stand.png';
-  //const imageBuffer = fs.readFileSync(imageFilePath);
-  //console.log("IMAGE: " + imageBuffer);
-  /*const params = {  Image: {
-    Bytes: "",  },
-};
-
-rekognition.detectLabels(params, (err: any, data: { Labels: any; }) => {  
-  if (err) {
-    console.error('Error detecting labels:', err); 
- } else {
-    console.log('Labels detected:', data.Labels); 
-   }
-  });*/
-
-
-
-
-
-/*var AWS = require("aws-sdk");
-
-AWS.config.update({ region: 'us-west-2' });
-console.log('Region: ' + AWS.config.region);
-
-const imageBase64 = ''
-const imageBytes = Buffer.from(imageBase64, 'base64');
-const params = {  Image: {
-    Bytes: imageBytes,  },
-};
-rekognition.detectLabels(params, (err: any, data: { Labels: any; }) => {  if (err) {
-    console.error('Error detecting labels:', err);  } else {
-    console.log('Labels detected:', data.Labels);  }
-});*/
-
